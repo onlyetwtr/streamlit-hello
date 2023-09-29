@@ -1,4 +1,5 @@
 import streamlit as st
+import matplotlib.pyplot as plt
 
 def caffeine_calculator(caffeine_intake, bedtime, half_life):
     hours_to_bedtime = int(bedtime.split(':')[0])  # Now it starts from midnight
@@ -12,7 +13,7 @@ def caffeine_calculator(caffeine_intake, bedtime, half_life):
 
     caffeine_present = sum(caffeine_in_body[:hours_to_bedtime + 1])
 
-    return f"The caffeine content in your body at bedtime is: {round(caffeine_present, 2)} mg"
+    return caffeine_in_body, f"The caffeine content in your body at bedtime is: {round(caffeine_present, 2)} mg"
 
 def main():
     st.title('Caffeine Calculator')
@@ -27,8 +28,19 @@ def main():
     half_life = st.number_input('Half-life of caffeine:', value=3)
 
     if st.button('Submit'):
-        result = caffeine_calculator(caffeine_intake, bedtime, half_life)
+        caffeine_over_time, result = caffeine_calculator(caffeine_intake, bedtime, half_life)
         st.write(result)
+
+        # Plotting the caffeine content over time
+        fig, ax = plt.subplots()
+        ax.plot([str(i) + ":00" for i in range(24)], caffeine_over_time)
+        ax.set_xlabel('Hour')
+        ax.set_ylabel('Caffeine Content (mg)')
+        ax.set_title('Caffeine Content Over Time')
+        ax.grid(True)
+        ax.set_xticks([str(i) + ":00" for i in range(0, 24, 2)])  # Displaying every 2nd hour for clarity
+        ax.set_xticklabels([str(i) + ":00" for i in range(0, 24, 2)], rotation=45)  # Rotating labels for clarity
+        st.pyplot(fig)
 
 if __name__ == '__main__':
     main()
