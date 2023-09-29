@@ -1,50 +1,34 @@
-# Copyright 2018-2022 Streamlit Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import streamlit as st
-from streamlit.logger import get_logger
 
-LOGGER = get_logger(__name__)
+def caffeine_calculator(caffeine_intake, bedtime, half_life):
+    hours_to_bedtime = int(bedtime.split(':')[0])  # Now it starts from midnight
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+    caffeine_in_body = [0] * len(caffeine_intake)
 
-    st.write("# Welcome to Streamlit! 👋")
+    for i in range(len(caffeine_intake)):
+        caffeine_in_body[i] += caffeine_intake[i]
+        for j in range(i):
+            caffeine_in_body[j] *= 0.5 ** (1 / half_life)
 
-    st.sidebar.success("Select a demo above.")
+    caffeine_present = sum(caffeine_in_body[:hours_to_bedtime + 1])
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+    return f"The caffeine content in your body at bedtime is: {round(caffeine_present, 2)} mg"
 
+def main():
+    st.title('Caffeine Calculator')
 
-if __name__ == "__main__":
-    run()
+    caffeine_intake = []
+    for i in range(24):  # Getting caffeine intake for the full 24-hour day
+        hour_label = str(i) + ":00: "
+        intake = st.number_input(hour_label, key=f'hour_{i}', value=0)
+        caffeine_intake.append(intake)
+
+    bedtime = st.text_input('Bedtime (24h format):', value='22:00')
+    half_life = st.number_input('Half-life of caffeine:', value=3)
+
+    if st.button('Submit'):
+        result = caffeine_calculator(caffeine_intake, bedtime, half_life)
+        st.write(result)
+
+if __name__ == '__main__':
+    main()
