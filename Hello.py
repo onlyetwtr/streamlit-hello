@@ -1,19 +1,19 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 
-def caffeine_calculator(caffeine_intake, bedtime, half_life):
-    hours_to_bedtime = int(bedtime.split(':')[0])
+def caffeine_calculator(caffeine_intake, half_life):
+    total_hours = len(caffeine_intake)
+    caffeine_in_body = [0] * total_hours
 
-    caffeine_in_body = [0] * len(caffeine_intake)
+    # For each hour, calculate how the caffeine has decayed from previous hours
+    for current_hour in range(total_hours):
+        for intake_hour, intake in enumerate(caffeine_intake):
+            time_since_intake = current_hour - intake_hour
+            if time_since_intake >= 0:
+                decayed_caffeine = intake * (0.5 ** (time_since_intake / half_life))
+                caffeine_in_body[current_hour] += decayed_caffeine
 
-    for i in range(len(caffeine_intake)):
-        caffeine_in_body[i] += caffeine_intake[i]
-        for j in range(i):
-            caffeine_in_body[j] *= 0.5 ** (1 / half_life)
-
-    caffeine_present = sum(caffeine_in_body[:hours_to_bedtime + 1])
-
-    return caffeine_in_body, f"The caffeine content in your body at bedtime is: {round(caffeine_present, 2)} mg"
+    return caffeine_in_body
 
 def main():
     st.title('Caffeine Calculator')
@@ -24,12 +24,10 @@ def main():
         intake = st.number_input(hour_label, key=f'hour_{i}', value=0)
         caffeine_intake.append(intake)
 
-    bedtime = st.text_input('Bedtime (24h format):', value='22:00')
     half_life = st.number_input('Half-life of caffeine:', value=3)
 
     if st.button('Submit'):
-        caffeine_over_time, result = caffeine_calculator(caffeine_intake, bedtime, half_life)
-        st.write(result)
+        caffeine_over_time = caffeine_calculator(caffeine_intake, half_life)
 
         # Plotting the caffeine content and raw intake over time
         hours = [str(i) + ":00" for i in range(24)]
