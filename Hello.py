@@ -24,7 +24,7 @@ def main():
         intake = st.number_input(hour_label, key=f'hour_{i}', value=0)
         caffeine_intake.append(intake)
 
-    half_life = st.number_input('Half-life of caffeine:', value=3)
+    half_life = st.slider('Half-life of caffeine:', min_value=3, max_value=12, value=3)
 
     if st.button('Submit'):
         caffeine_over_time = caffeine_calculator(caffeine_intake, half_life)
